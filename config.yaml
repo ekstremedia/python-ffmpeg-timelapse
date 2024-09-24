@@ -1,0 +1,40 @@
+image_input:
+  folder: '/var/www/html/images/'
+  folder_structure: '%Y/%m/%d/'
+  extension: '.jpg'
+  # timelapse_ends: '04:00'
+  # timelapse_starts: '04:00'
+  morning_to_morning: True
+  morning_time: '04:00'
+
+video_output:
+  folder: '/var/www/html/test_videos/'
+  folder_structure: '%Y/%m/%d/'
+  filename_time_format: '%Y_%m_%d_%H_%M_%S'
+  codec: 'h264_v4l2m2m'
+  extension: '.mp4'
+  crf: 20
+  preset: 'medium'
+  max_bitrate: '5000k'
+  min_bitrate: '5000k'
+  buffer_size: '5000k'
+  video_size: '1920x1080'
+  fps: 25
+  # video_filter: "deflicker,setpts=N/FRAME_RATE/TB,tmix=frames=5:weights='1 1 1 1 1'" # "deflicker,setpts=N/FRAME_RATE/TB,eq=brightness=0.02:contrast=1.1"
+  video_filter: "deflicker,setpts=N/FRAME_RATE/TB,eq=brightness=0.02:contrast=1.1"
+
+filename:
+  prefix: 'video_'
+  suffix: ''
+  append_metadata: True
+  extension: '.mp4'
+
+metadata:
+  save_to_file: True
+
+log:
+  folder: 'logs/'
+  filename: 'timelapse.log'
+  level: 'INFO'
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  datefmt: '%Y-%m-%d %H:%M:%S'
