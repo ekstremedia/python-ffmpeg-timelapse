@@ -142,29 +142,34 @@ def create_timelapse(date):
         start_time = datetime.now()
         log_with_color(f"Creating timelapse for date: {date}", "info", "green")
 
-        # Get list of images for the given date
-        images = get_image_files(date)
-
         # Apply morning-to-morning logic if set in config
+        images = []
         if config['image_input']['morning_to_morning']:
             log_with_color("Applying morning-to-morning logic", "info", "cyan")
+
+            # Define start and end times
             morning_time = datetime.strptime(config['image_input']['morning_time'], "%H:%M").time()
             start_time_morning = datetime.combine(date, morning_time)
             end_time_morning = start_time_morning + timedelta(days=1)
 
-            # Filter images from today and up to tomorrow's morning
-            images = [img for img in images if start_time_morning <= datetime.fromtimestamp(os.path.getmtime(img)) <= end_time_morning]
+            # Get images from today starting at morning_time
+            today_images = get_image_files(date)
+            today_filtered_images = [img for img in today_images if datetime.fromtimestamp(os.path.getmtime(img)) >= start_time_morning]
 
-            # If no images found for today, check for tomorrow's images
-            if not images:
-                log_with_color(f"No images found for {date}, looking for tomorrow's images.", "warning", "yellow")
-                images = get_image_files(date + timedelta(days=1))
-                images = [img for img in images if start_time_morning <= datetime.fromtimestamp(os.path.getmtime(img)) <= end_time_morning]
+            # Get images from tomorrow up to morning_time
+            tomorrow_images = get_image_files(date + timedelta(days=1))
+            tomorrow_filtered_images = [img for img in tomorrow_images if datetime.fromtimestamp(os.path.getmtime(img)) <= end_time_morning]
+
+            # Combine images from today and tomorrow
+            images = today_filtered_images + tomorrow_filtered_images
+        else:
+            # Get images from the selected date if morning-to-morning is not enabled
+            images = get_image_files(date)
 
         if not images:
             log_with_color(f"No images found for the selected date: {date}", "error", "red")
             return
-        
+
         # If test-amount is specified, limit the number of images
         if args.test_amount:
             log_with_color(f"Using only the first {args.test_amount} images for testing", "info", "magenta")
@@ -232,6 +237,7 @@ def create_timelapse(date):
 
     except Exception as e:
         log_with_color(f"Error creating timelapse: {e}", "error", "red")
+
 
 # Argument parsing
 parser = ArgumentParser(description="Create a timelapse video from images")
